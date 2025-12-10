@@ -1,3 +1,106 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Honey-inspired color variables */
+    --color-honey-light: #FDF4E6;
+    --color-honey-golden: #D4A574;
+    --color-honey-brown: #8B7355;
+    
+    /* Background colors */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #FAFAFA;
+    --bg-accent: #FDF4E6;
+    
+    /* Text colors */
+    --text-primary: #171717;
+    --text-secondary: #525252;
+    --text-muted: #A3A3A3;
+    
+    /* Border colors */
+    --border-light: #E5E5E5;
+    --border-medium: #D4D4D4;
+  }
+  
+  * {
+    border-color: theme('colors.neutral.200');
+  }
+  
+  body {
+    @apply bg-neutral-50 text-neutral-900 font-sans;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  /* Button styles */
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 
+           focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .btn-primary {
+    @apply bg-honey-500 text-white hover:bg-honey-600 
+           focus:ring-honey-500 shadow-sm;
+  }
+  
+  .btn-secondary {
+    @apply bg-neutral-100 text-neutral-700 hover:bg-neutral-200 
+           focus:ring-neutral-400 border border-neutral-300;
+  }
+  
+  /* Card styles */
+  .card {
+    @apply bg-white rounded-xl shadow-soft p-6 border border-neutral-100;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-soft-lg hover:-translate-y-1;
+  }
+  
+  /* Input styles */
+  .input {
+    @apply w-full px-4 py-2 border border-neutral-300 rounded-lg 
+           focus:outline-none focus:ring-2 focus:ring-honey-500 focus:border-transparent
+           transition-all duration-200;
+  }
+  
+  /* Badge styles */
+  .badge {
+    @apply px-3 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .badge-success {
+    @apply bg-success-light text-success-dark;
+  }
+  
+  .badge-warning {
+    @apply bg-warning-light text-warning-dark;
+  }
+  
+  .badge-error {
+    @apply bg-error-light text-error-dark;
+  }
+  
+  .badge-info {
+    @apply bg-info-light text-info-dark;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-honey-500 to-honey-700 bg-clip-text text-transparent;
+  }
+  
+  .honey-glow {
+    box-shadow: 0 0 20px rgba(212, 165, 116, 0.3);
+  }
+}
