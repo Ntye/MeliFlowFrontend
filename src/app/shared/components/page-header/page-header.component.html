@@ -1,0 +1,21 @@
+<header class="bg-white border-b border-neutral-100 px-8 py-6">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      @if (icon) {
+        <span class="text-4xl">{{ icon }}</span>
+      }
+      <div>
+        <h1 class="text-3xl font-bold text-neutral-900">{{ title }}</h1>
+        @if (subtitle) {
+          <p class="text-neutral-500 mt-1">{{ subtitle }}</p>
+        }
+      </div>
+    </div>
+    
+    @if (showActions) {
+      <div class="flex items-center gap-3">
+        <ng-content select="[actions]"></ng-content>
+      </div>
+    }
+  </div>
+</header>

@@ -1,0 +1,37 @@
+<div class="card">
+  <div class="flex items-start justify-between">
+    <div class="flex items-start gap-3 flex-1">
+      <span class="text-2xl">{{ getAlertIcon(alert.type) }}</span>
+      <div class="flex-1">
+        <h4 class="font-semibold text-neutral-900 mb-1 capitalize">{{ alert.type }} Alert</h4>
+        <p class="text-sm text-neutral-600 mb-2">
+          Trigger when {{ alert.type }} is 
+          <span class="font-medium">{{ alert.condition }}</span>
+          <span class="font-bold text-honey-700"> {{ alert.threshold }}</span>
+        </p>
+        @if (alert.message) {
+          <p class="text-xs text-neutral-500 italic">{{ alert.message }}</p>
+        }
+      </div>
+    </div>
+    
+    <!-- Toggle Switch -->
+    <label class="relative inline-flex items-center cursor-pointer">
+      <input 
+        type="checkbox" 
+        [checked]="alert.enabled"
+        (change)="onToggle()"
+        class="sr-only peer">
+      <div class="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-honey-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-honey-500"></div>
+    </label>
+  </div>
+
+  <!-- Edit button -->
+  <div class="mt-4 pt-4 border-t border-neutral-100">
+    <button 
+      (click)="onEdit()"
+      class="text-sm text-honey-600 hover:text-honey-700 font-medium transition-colors">
+      Edit Configuration →
+    </button>
+  </div>
+</div>

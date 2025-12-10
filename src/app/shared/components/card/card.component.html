@@ -1,0 +1,19 @@
+<div 
+  class="card"
+  [class.card-hover]="hoverable">
+  
+  @if (title || subtitle) {
+    <div class="border-b border-neutral-100 pb-4 mb-4">
+      @if (title) {
+        <h3 class="text-lg font-semibold text-neutral-900">{{ title }}</h3>
+      }
+      @if (subtitle) {
+        <p class="text-sm text-neutral-500 mt-1">{{ subtitle }}</p>
+      }
+    </div>
+  }
+  
+  <div class="card-content">
+    <ng-content></ng-content>
+  </div>
+</div>

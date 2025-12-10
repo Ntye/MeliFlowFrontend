@@ -1,0 +1,22 @@
+<nav class="flex items-center gap-2 text-sm text-neutral-600 py-3 px-8">
+  @for (item of items; track $index; let isLast = $last) {
+    @if (!isLast && item.url) {
+      <a 
+        [routerLink]="item.url" 
+        class="hover:text-honey-600 transition-colors flex items-center gap-2">
+        @if (item.icon) {
+          <span>{{ item.icon }}</span>
+        }
+        <span>{{ item.label }}</span>
+      </a>
+      <span class="text-neutral-400">/</span>
+    } @else {
+      <span class="text-neutral-900 font-medium flex items-center gap-2">
+        @if (item.icon) {
+          <span>{{ item.icon }}</span>
+        }
+        <span>{{ item.label }}</span>
+      </span>
+    }
+  }
+</nav>

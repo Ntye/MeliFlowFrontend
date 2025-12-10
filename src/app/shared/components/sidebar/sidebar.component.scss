@@ -1,0 +1,20 @@
+@import '../../styles/variables';
+
+:host {
+  display: block;
+}
+
+aside {
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+}
+
+// Mobile responsive
+@media (max-width: $breakpoint-md) {
+  aside {
+    transform: translateX(-100%);
+    
+    &.mobile-open {
+      transform: translateX(0);
+    }
+  }
+}

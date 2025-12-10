@@ -1,0 +1,47 @@
+<aside 
+  class="fixed left-0 top-0 h-screen bg-white border-r border-neutral-200 transition-all duration-300 z-40"
+  [class.w-64]="!isCollapsed()"
+  [class.w-20]="isCollapsed()">
+  
+  <!-- Logo/Header -->
+  <div class="h-16 flex items-center justify-between px-6 border-b border-neutral-100">
+    @if (!isCollapsed()) {
+      <div class="flex items-center gap-3">
+        <span class="text-3xl">🍯</span>
+        <span class="font-display font-bold text-xl text-gradient">MeliFlow</span>
+      </div>
+    } @else {
+      <span class="text-3xl mx-auto">🍯</span>
+    }
+  </div>
+
+  <!-- Navigation -->
+  <nav class="p-4 space-y-2">
+    @for (item of navItems; track item.route) {
+      <a 
+        [routerLink]="item.route"
+        routerLinkActive="bg-honey-50 text-honey-700 border-l-4 border-honey-500"
+        class="flex items-center gap-4 px-4 py-3 rounded-lg text-neutral-700 hover:bg-honey-50 hover:text-honey-700 transition-all duration-200 group"
+        [class.justify-center]="isCollapsed()">
+        <span class="text-2xl">{{ item.icon }}</span>
+        @if (!isCollapsed()) {
+          <span class="font-medium">{{ item.label }}</span>
+        }
+        
+        <!-- Tooltip for collapsed state -->
+        @if (isCollapsed()) {
+          <div class="absolute left-20 bg-neutral-900 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            {{ item.label }}
+          </div>
+        }
+      </a>
+    }
+  </nav>
+
+  <!-- Toggle Button -->
+  <button 
+    (click)="toggleSidebar()"
+    class="absolute bottom-4 -right-3 w-6 h-6 bg-white border border-neutral-200 rounded-full shadow-sm hover:shadow-md transition-all flex items-center justify-center">
+    <span class="text-xs">{{ isCollapsed() ? '→' : '←' }}</span>
+  </button>
+</aside>
