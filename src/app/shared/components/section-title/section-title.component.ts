@@ -5,8 +5,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-section-title',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './section-title.component.html',
-  styleUrl: './section-title.component.scss'
+  templateUrl: './section-title.component.html'
 })
 export class SectionTitleComponent {
   @Input() title: string = '';

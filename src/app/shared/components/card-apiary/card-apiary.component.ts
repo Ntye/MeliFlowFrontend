@@ -6,8 +6,7 @@ import { ApiaryData } from '../../types/common.types';
   selector: 'app-card-apiary',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './card-apiary.component.html',
-  styleUrl: './card-apiary.component.scss'
+  templateUrl: './card-apiary.component.html'
 })
 export class CardApiaryComponent {
   @Input() apiary!: ApiaryData;

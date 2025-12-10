@@ -6,8 +6,7 @@ import { StatsData } from '../../types/common.types';
   selector: 'app-stats-card',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './stats-card.component.html',
-  styleUrl: './stats-card.component.scss'
+  templateUrl: './stats-card.component.html'
 })
 export class StatsCardComponent {
   @Input() data!: StatsData;

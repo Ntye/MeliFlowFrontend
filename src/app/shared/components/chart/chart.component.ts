@@ -6,8 +6,7 @@ import { ChartDataPoint } from '../../types/common.types';
   selector: 'app-chart',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './chart.component.html',
-  styleUrl: './chart.component.scss'
+  templateUrl: './chart.component.html'
 })
 export class ChartComponent implements OnInit, OnDestroy {
   @Input() data: ChartDataPoint[] = [];

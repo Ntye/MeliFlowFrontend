@@ -6,8 +6,7 @@ import { HiveData } from '../../types/common.types';
   selector: 'app-card-hive',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './card-hive.component.html',
-  styleUrl: './card-hive.component.scss'
+  templateUrl: './card-hive.component.html'
 })
 export class CardHiveComponent {
   @Input() hive!: HiveData;

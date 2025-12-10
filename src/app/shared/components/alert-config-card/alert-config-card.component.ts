@@ -6,8 +6,7 @@ import { AlertConfig } from '../../types/common.types';
   selector: 'app-alert-config-card',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './alert-config-card.component.html',
-  styleUrl: './alert-config-card.component.scss'
+  templateUrl: './alert-config-card.component.html'
 })
 export class AlertConfigCardComponent {
   @Input() alert!: AlertConfig;

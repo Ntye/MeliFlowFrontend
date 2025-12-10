@@ -5,8 +5,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-mini-info-card',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './mini-info-card.component.html',
-  styleUrl: './mini-info-card.component.scss'
+  templateUrl: './mini-info-card.component.html'
 })
 export class MiniInfoCardComponent {
   @Input() label: string = '';

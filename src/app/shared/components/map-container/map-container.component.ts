@@ -12,8 +12,7 @@ export interface MapMarker {
   selector: 'app-map-container',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './map-container.component.html',
-  styleUrl: './map-container.component.scss'
+  templateUrl: './map-container.component.html'
 })
 export class MapContainerComponent implements OnInit, OnDestroy {
   @Input() markers: MapMarker[] = [];

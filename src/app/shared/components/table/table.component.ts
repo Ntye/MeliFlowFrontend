@@ -6,8 +6,7 @@ import { TableColumn } from '../../types/common.types';
   selector: 'app-table',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './table.component.html',
-  styleUrl: './table.component.scss'
+  templateUrl: './table.component.html'
 })
 export class TableComponent {
   @Input() columns: TableColumn[] = [];

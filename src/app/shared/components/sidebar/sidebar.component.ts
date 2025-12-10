@@ -13,8 +13,7 @@ interface NavItem {
   selector: 'app-sidebar',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.scss'
+  templateUrl: './sidebar.component.html'
 })
 export class SidebarComponent {
   protected isCollapsed = signal(false);

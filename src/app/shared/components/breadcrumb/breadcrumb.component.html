@@ -1,4 +1,4 @@
-<nav class="flex items-center gap-2 text-sm text-neutral-600 py-3 px-8">
+<nav class="flex items-center gap-2 text-sm text-neutral-600 py-3 px-8 bg-white border-b border-neutral-200">
   @for (item of items; track $index; let isLast = $last) {
     @if (!isLast && item.url) {
       <a 
