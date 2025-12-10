@@ -20,12 +20,7 @@
           class="transition-colors duration-150">
           @for (column of columns; track column.key) {
             <td class="px-6 py-4 text-sm text-neutral-900">
-              <ng-container [ngTemplateOutlet]="cellTemplate" 
-                           [ngTemplateOutletContext]="{row: row, column: column}">
-              </ng-container>
-              @if (!cellTemplate) {
-                {{ row[column.key] }}
-              }
+              {{ row[column.key] }}
             </td>
           }
         </tr>
@@ -39,7 +34,3 @@
     </tbody>
   </table>
 </div>
-
-<ng-template #cellTemplate let-row="row" let-column="column">
-  <ng-content></ng-content>
-</ng-template>
