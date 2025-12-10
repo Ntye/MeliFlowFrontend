@@ -1,0 +1,94 @@
+<div class="dashboard-container">
+  <!-- Breadcrumb -->
+  <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
+
+  <!-- Page Header -->
+  <app-page-header
+    title="Dashboard"
+    subtitle="Welcome to your beekeeping management dashboard"
+    icon="📊"
+    [showActions]="true">
+    <div actions class="flex gap-2">
+      <button class="btn btn-secondary">
+        <span>📥 Export Data</span>
+      </button>
+      <button class="btn btn-primary">
+        <span>➕ Add Hive</span>
+      </button>
+    </div>
+  </app-page-header>
+
+  <!-- Main Content -->
+  <div class="p-8 space-y-8">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      @for (stat of stats; track $index) {
+        <app-stats-card [data]="stat"></app-stats-card>
+      }
+    </div>
+
+    <!-- Charts Section -->
+    <app-section-title
+      title="Production Overview"
+      subtitle="Honey production trends over the last 30 days"
+      icon="📈">
+    </app-section-title>
+
+    <app-card>
+      <app-chart
+        title="Weight Trends"
+        [type]="'line'"
+        height="350px">
+      </app-chart>
+    </app-card>
+
+    <!-- Recent Hives -->
+    <app-section-title
+      title="Recent Hive Activity"
+      subtitle="Latest updates from your hives"
+      icon="🐝">
+    </app-section-title>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (hive of recentHives; track hive.id) {
+        <app-card-hive 
+          [hive]="hive"
+          (cardClick)="onHiveClick($event)">
+        </app-card-hive>
+      }
+    </div>
+
+    <!-- Quick Actions -->
+    <app-section-title
+      title="Quick Actions"
+      subtitle="Common tasks and shortcuts"
+      icon="⚡">
+    </app-section-title>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <app-card [hoverable]="true">
+        <div class="text-center py-6">
+          <span class="text-4xl mb-3 block">🐝</span>
+          <h3 class="font-semibold text-neutral-900 mb-2">Manage Hives</h3>
+          <p class="text-sm text-neutral-500">View and manage all your hives</p>
+        </div>
+      </app-card>
+
+      <app-card [hoverable]="true">
+        <div class="text-center py-6">
+          <span class="text-4xl mb-3 block">🏞️</span>
+          <h3 class="font-semibold text-neutral-900 mb-2">Manage Apiaries</h3>
+          <p class="text-sm text-neutral-500">View and organize your apiaries</p>
+        </div>
+      </app-card>
+
+      <app-card [hoverable]="true">
+        <div class="text-center py-6">
+          <span class="text-4xl mb-3 block">🔔</span>
+          <h3 class="font-semibold text-neutral-900 mb-2">Configure Alerts</h3>
+          <p class="text-sm text-neutral-500">Set up monitoring alerts</p>
+        </div>
+      </app-card>
+    </div>
+  </div>
+</div>

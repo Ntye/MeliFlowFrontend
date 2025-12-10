@@ -1,4 +1,4 @@
-@import '../../styles/variables';
+@use '../../styles/variables' as vars;
 
 :host {
   display: block;
@@ -9,7 +9,7 @@ aside {
 }
 
 // Mobile responsive
-@media (max-width: $breakpoint-md) {
+@media (max-width: vars.$breakpoint-md) {
   aside {
     transform: translateX(-100%);
     
