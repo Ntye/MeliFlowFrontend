@@ -390,7 +390,10 @@ export class MockDataService {
 
   // Add/Update methods
   addRucher(rucher: Rucher): Rucher {
-    const newRucher = { ...rucher, id: this.ruchers.length + 1 };
+    const maxId = this.ruchers.length > 0 
+      ? Math.max(...this.ruchers.map(r => r.id))
+      : 0;
+    const newRucher = { ...rucher, id: maxId + 1 };
     this.ruchers.push(newRucher);
     return newRucher;
   }
@@ -405,7 +408,10 @@ export class MockDataService {
   }
 
   addRuche(ruche: Ruche): Ruche {
-    const newRuche = { ...ruche, id: this.ruches.length + 1 };
+    const maxId = this.ruches.length > 0 
+      ? Math.max(...this.ruches.map(r => r.id))
+      : 0;
+    const newRuche = { ...ruche, id: maxId + 1 };
     this.ruches.push(newRuche);
     return newRuche;
   }
@@ -420,7 +426,10 @@ export class MockDataService {
   }
 
   addAlertRule(rule: AlertRule): AlertRule {
-    const newRule = { ...rule, id: this.alertRules.length + 1 };
+    const maxId = this.alertRules.length > 0 
+      ? Math.max(...this.alertRules.map(r => r.id))
+      : 0;
+    const newRule = { ...rule, id: maxId + 1 };
     this.alertRules.push(newRule);
     return newRule;
   }
