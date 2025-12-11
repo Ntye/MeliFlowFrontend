@@ -98,7 +98,8 @@ export class MockDataService {
       const createdDate = new Date();
       createdDate.setDate(createdDate.getDate() - Math.floor(Math.random() * 180));
 
-      const isActive = Math.random() > 0.1; // 90% active
+      // Ensure first 10 hives are always active for testing, others 90% active
+      const isActive = i < 10 ? true : Math.random() > 0.1;
       
       this.ruches.push({
         id: i + 1,
