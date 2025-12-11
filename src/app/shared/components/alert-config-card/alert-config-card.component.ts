@@ -13,17 +13,6 @@ export class AlertConfigCardComponent {
   @Output() toggleAlert = new EventEmitter<AlertConfig>();
   @Output() editAlert = new EventEmitter<AlertConfig>();
 
-  getAlertIcon(type: string): string {
-    const icons: Record<string, string> = {
-      'weight': '⚖️',
-      'temperature': '🌡️',
-      'humidity': '💧',
-      'battery': '🔋',
-      'signal': '📡'
-    };
-    return icons[type] || '🔔';
-  }
-
   onToggle() {
     this.toggleAlert.emit(this.alert);
   }

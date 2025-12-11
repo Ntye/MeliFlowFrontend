@@ -9,7 +9,6 @@ import { CommonModule } from '@angular/common';
 })
 export class PageHeaderComponent {
   @Input() title: string = '';
-  @Input() icon?: string;
   @Input() subtitle?: string;
   @Input() showActions: boolean = false;
 }

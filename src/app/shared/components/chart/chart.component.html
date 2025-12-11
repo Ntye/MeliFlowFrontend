@@ -1,14 +1,66 @@
-<div class="chart-container">
+<div class="chart-container w-full h-full flex flex-col">
   @if (title) {
     <h3 class="text-lg font-semibold text-neutral-900 mb-4">{{ title }}</h3>
   }
-  <div 
-    class="chart-canvas bg-neutral-50 rounded-lg flex items-center justify-center text-neutral-400"
-    [style.height]="height">
-    <div class="text-center">
-      <p class="text-lg">📊</p>
-      <p class="text-sm">Chart placeholder</p>
-      <p class="text-xs mt-2">Chart.js integration pending</p>
-    </div>
+
+  <div class="relative w-full flex-1" [style.height]="height">
+    @if (data.length > 0) {
+      <svg viewBox="0 0 1000 300" preserveAspectRatio="none" class="w-full h-full overflow-visible">
+        <defs>
+          <linearGradient id="honeyGradient" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#D4A574" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#D4A574" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="gainGradient" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#10B981" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Grid Lines -->
+        <g class="grid-lines opacity-10">
+          <line x1="0" y1="75" x2="1000" y2="75" stroke="currentColor" stroke-width="1"/>
+          <line x1="0" y1="150" x2="1000" y2="150" stroke="currentColor" stroke-width="1"/>
+          <line x1="0" y1="225" x2="1000" y2="225" stroke="currentColor" stroke-width="1"/>
+        </g>
+
+        <!-- Area Fill -->
+        <path [attr.d]="areaPath" fill="url(#honeyGradient)" />
+
+        <!-- Main Line (Weight) -->
+        <path [attr.d]="linePath" fill="none" stroke="#D4A574" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="drop-shadow-sm" />
+
+        <!-- Secondary Line (Gain) -->
+        <path [attr.d]="gainPath" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5,5" class="opacity-80" />
+
+        <!-- Points -->
+        @for (point of points; track point.index) {
+          @if (point.index % 5 === 0) {
+            <circle
+              [attr.cx]="point.x"
+              [attr.cy]="point.y"
+              r="4"
+              fill="#fff"
+              stroke="#D4A574"
+              stroke-width="2"
+            />
+          }
+        }
+      </svg>
+
+      <!-- Labels X-Axis -->
+      <div class="flex justify-between text-xs text-neutral-400 mt-2 px-2">
+        <span>{{ data[0].timestamp | date:'dd MMM' }}</span>
+        <span>{{ data[midIndex].timestamp | date:'dd MMM' }}</span>
+        <span>{{ data[data.length-1].timestamp | date:'dd MMM' }}</span>
+      </div>
+
+    } @else {
+      <div class="w-full h-full flex items-center justify-center bg-neutral-50 rounded-lg text-neutral-400">
+        <div class="text-center">
+          <p class="text-sm">No data available</p>
+        </div>
+      </div>
+    }
   </div>
 </div>

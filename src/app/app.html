@@ -1,11 +1,22 @@
+<!--&lt;!&ndash; MeliFlow Application Layout &ndash;&gt;-->
+<!--<div class="app-container">-->
+<!--  &lt;!&ndash; Sidebar Navigation &ndash;&gt;-->
+<!--  <app-sidebar></app-sidebar>-->
+<!--  -->
+<!--  &lt;!&ndash; Main Content Area &ndash;&gt;-->
+<!--  <main class="main-content ml-64 min-h-screen">-->
+<!--    <router-outlet />-->
+<!--  </main>-->
+<!--</div>-->
+
+
 <!-- MeliFlow Application Layout -->
-<div class="app-container">
-  <!-- Sidebar Navigation -->
+<div class="flex min-h-screen">
+  <!-- Sidebar Navigation (Responsive) -->
   <app-sidebar></app-sidebar>
-  
+
   <!-- Main Content Area -->
-  <main class="main-content ml-64 min-h-screen">
+  <main class="min-h-screen transition-all duration-300 md:flex-1 bg-neutral-50">
     <router-outlet />
   </main>
 </div>
-

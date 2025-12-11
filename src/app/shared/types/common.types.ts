@@ -3,12 +3,10 @@
 export interface BreadcrumbItem {
   label: string;
   url?: string;
-  icon?: string;
 }
 
 export interface MenuItem {
   label: string;
-  icon: string;
   route: string;
   active?: boolean;
 }
@@ -16,7 +14,6 @@ export interface MenuItem {
 export interface StatsData {
   label: string;
   value: string | number;
-  icon?: string;
   trend?: {
     value: number;
     direction: 'up' | 'down';

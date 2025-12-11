@@ -4,7 +4,6 @@ import { RouterModule } from '@angular/router';
 
 interface NavItem {
   label: string;
-  icon: string;
   route: string;
   children?: NavItem[];
 }
@@ -17,33 +16,13 @@ interface NavItem {
 })
 export class SidebarComponent {
   protected isCollapsed = signal(false);
-  
+
   protected navItems: NavItem[] = [
-    {
-      label: 'Dashboard',
-      icon: '📊',
-      route: '/dashboard'
-    },
-    {
-      label: 'My Hives',
-      icon: '🐝',
-      route: '/hives'
-    },
-    {
-      label: 'My Apiaries',
-      icon: '🏞️',
-      route: '/apiaries'
-    },
-    {
-      label: 'Alerts',
-      icon: '🔔',
-      route: '/alerts'
-    },
-    {
-      label: 'Configuration',
-      icon: '⚙️',
-      route: '/config'
-    }
+    { label: 'Dashboard', route: '/dashboard' },
+    { label: 'My Hives', route: '/hives' },
+    { label: 'My Apiaries', route: '/apiaries' },
+    { label: 'Alerts', route: '/alerts' },
+    { label: 'Configuration', route: '/config' }
   ];
 
   toggleSidebar() {

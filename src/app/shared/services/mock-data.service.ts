@@ -28,7 +28,7 @@ export class MockDataService {
   }
 
   private generateRuchers() {
-    // Apiary 1: Point location in Paris area
+    // Apiary 1: Rucher des Jardins (Paris area) - Will contain Alpha and Beta
     this.ruchers.push({
       id: 1,
       name: 'Rucher des Jardins',
@@ -40,7 +40,7 @@ export class MockDataService {
       created_at: new Date('2024-01-15')
     });
 
-    // Apiary 2: Polygon location in Lyon area
+    // Apiary 2: Rucher de la Colline (Lyon area) - Will contain Gamma
     this.ruchers.push({
       id: 2,
       name: 'Rucher de la Colline',
@@ -58,7 +58,7 @@ export class MockDataService {
       created_at: new Date('2024-02-20')
     });
 
-    // Apiary 3: Point location in Toulouse area
+    // Apiary 3: Rucher du Sud (Toulouse area)
     this.ruchers.push({
       id: 3,
       name: 'Rucher du Sud',
@@ -77,30 +77,47 @@ export class MockDataService {
       'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda', 'Mu'
     ];
 
-    // Generate 12 hives distributed across 3 apiaries
+    // Generate 12 hives
     for (let i = 0; i < 12; i++) {
-      const rucherId = (i % 3) + 1;
-      const rucherGeom = this.ruchers[rucherId - 1].geom;
-      
-      // Get base coordinates from apiary
-      let baseLng: number, baseLat: number;
-      if (rucherGeom.type === 'Point') {
-        [baseLng, baseLat] = rucherGeom.coordinates;
-      } else {
-        // For polygon, use center of first point
-        [baseLng, baseLat] = rucherGeom.coordinates[0][0];
-      }
+      let rucherId: number;
+      let coords: [number, number]; // [lng, lat]
 
-      // Add small random offset for each hive location
-      const lngOffset = (Math.random() - 0.5) * 0.01;
-      const latOffset = (Math.random() - 0.5) * 0.01;
+      // SPECIFIC LOGIC: Group Alpha & Beta in Rucher 1, Gamma in Rucher 2
+      if (i === 0) {
+        // Alpha -> Rucher 1
+        rucherId = 1;
+        coords = [2.3522, 48.8566]; // Center of Rucher 1
+      } else if (i === 1) {
+        // Beta -> Rucher 1 (Very close to Alpha)
+        rucherId = 1;
+        coords = [2.3526, 48.8568]; // Slightly offset
+      } else if (i === 2) {
+        // Gamma -> Rucher 2
+        rucherId = 2;
+        coords = [4.8357, 45.7640]; // Center of Rucher 2
+      } else {
+        // Others distributed randomly
+        rucherId = (i % 3) + 1;
+        const rucherGeom = this.ruchers[rucherId - 1].geom;
+        let baseLng: number, baseLat: number;
+
+        if (rucherGeom.type === 'Point') {
+          [baseLng, baseLat] = rucherGeom.coordinates;
+        } else {
+          // For polygon, use center of first point
+          [baseLng, baseLat] = rucherGeom.coordinates[0][0];
+        }
+
+        // Add larger random offset for others to make them distinct on map
+        const lngOffset = (Math.random() - 0.5) * 0.05;
+        const latOffset = (Math.random() - 0.5) * 0.05;
+        coords = [baseLng + lngOffset, baseLat + latOffset];
+      }
 
       const createdDate = new Date();
       createdDate.setDate(createdDate.getDate() - Math.floor(Math.random() * 180));
-
-      // Ensure first 10 hives are always active for testing, others 90% active
       const isActive = i < 10 ? true : Math.random() > 0.1;
-      
+
       this.ruches.push({
         id: i + 1,
         name: `Hive ${hiveNames[i]}`,
@@ -109,7 +126,7 @@ export class MockDataService {
         created_at: createdDate,
         geom: {
           type: 'Point',
-          coordinates: [baseLng + lngOffset, baseLat + latOffset]
+          coordinates: coords
         },
         active: isActive,
         current_weight: isActive ? 40 + Math.random() * 40 : undefined,
@@ -391,7 +408,7 @@ export class MockDataService {
 
   // Add/Update methods
   addRucher(rucher: Rucher): Rucher {
-    const maxId = this.ruchers.length > 0 
+    const maxId = this.ruchers.length > 0
       ? Math.max(...this.ruchers.map(r => r.id))
       : 0;
     const newRucher = { ...rucher, id: maxId + 1 };
@@ -409,7 +426,7 @@ export class MockDataService {
   }
 
   addRuche(ruche: Ruche): Ruche {
-    const maxId = this.ruches.length > 0 
+    const maxId = this.ruches.length > 0
       ? Math.max(...this.ruches.map(r => r.id))
       : 0;
     const newRuche = { ...ruche, id: maxId + 1 };
@@ -427,7 +444,7 @@ export class MockDataService {
   }
 
   addAlertRule(rule: AlertRule): AlertRule {
-    const maxId = this.alertRules.length > 0 
+    const maxId = this.alertRules.length > 0
       ? Math.max(...this.alertRules.map(r => r.id))
       : 0;
     const newRule = { ...rule, id: maxId + 1 };

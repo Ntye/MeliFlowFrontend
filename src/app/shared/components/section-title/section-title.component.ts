@@ -10,5 +10,4 @@ import { CommonModule } from '@angular/common';
 export class SectionTitleComponent {
   @Input() title: string = '';
   @Input() subtitle?: string;
-  @Input() icon?: string;
 }

@@ -1,23 +1,15 @@
-<div 
-  (click)="onClick()"
-  class="card card-hover cursor-pointer">
-  
-  <!-- Header with name and status -->
+<div class="card hover:shadow-honey transition-all duration-300">
   <div class="flex items-start justify-between mb-4">
-    <div class="flex items-center gap-3">
-      <span class="text-3xl">🏞️</span>
-      <div>
-        <h3 class="text-lg font-semibold text-neutral-900">{{ apiary.name }}</h3>
-        @if (apiary.location.address) {
-          <p class="text-xs text-neutral-500">📍 {{ apiary.location.address }}</p>
-        }
-      </div>
+    <div class="flex-1">
+      <h3 class="font-semibold text-neutral-900 text-lg mb-1">{{ apiary.name }}</h3>
+      <p class="text-sm text-neutral-500">{{ apiary.location.address }}</p>
     </div>
-    <span 
-      class="badge"
-      [ngClass]="getStatusBadgeClass(apiary.status)">
-      {{ apiary.status }}
-    </span>
+    <div 
+      class="w-10 h-10 rounded-lg flex items-center justify-center text-2xl"
+      [class.bg-success]="apiary.status === 'healthy'"
+      [class.bg-warning]="apiary.status === 'warning'"
+      [class.bg-error]="apiary.status === 'critical'">
+    </div>
   </div>
 
   <!-- Stats Grid -->
@@ -40,7 +32,6 @@
 
   <!-- Location -->
   <div class="flex items-center gap-2 text-sm text-neutral-600 pt-3 border-t border-neutral-100">
-    <span>📍</span>
     <span>{{ apiary.location.lat.toFixed(4) }}, {{ apiary.location.lng.toFixed(4) }}</span>
   </div>
 

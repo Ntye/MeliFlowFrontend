@@ -1,47 +1,61 @@
-<aside 
-  class="fixed left-0 top-0 h-screen bg-white border-r border-neutral-200 transition-all duration-300 z-40 shadow-[2px_0_10px_rgba(0,0,0,0.05)] md:translate-x-0 -translate-x-full"
-  [class.w-64]="!isCollapsed()"
-  [class.w-20]="isCollapsed()">
-  
-  <!-- Logo/Header -->
-  <div class="h-16 flex items-center justify-between px-6 border-b border-neutral-100">
-    @if (!isCollapsed()) {
-      <div class="flex items-center gap-3">
-        <span class="text-3xl">🍯</span>
-        <span class="font-display font-bold text-xl text-gradient">MeliFlow</span>
-      </div>
-    } @else {
-      <span class="text-3xl mx-auto">🍯</span>
-    }
-  </div>
+<!-- Desktop Sidebar -->
+<aside class="h-screen bg-white border-r border-neutral-200 transition-all duration-300 z-40">
 
-  <!-- Navigation -->
-  <nav class="p-4 space-y-2">
-    @for (item of navItems; track item.route) {
-      <a 
-        [routerLink]="item.route"
-        routerLinkActive="bg-honey-50 text-honey-700 border-l-4 border-honey-500"
-        class="flex items-center gap-4 px-4 py-3 rounded-lg text-neutral-700 hover:bg-honey-50 hover:text-honey-700 transition-all duration-200 group"
-        [class.justify-center]="isCollapsed()">
-        <span class="text-2xl">{{ item.icon }}</span>
+
+    <!-- Logo/Header -->
+    <div class="h-20 flex items-center justify-between px-6 border-b border-neutral-100 flex-shrink-0">
         @if (!isCollapsed()) {
-          <span class="font-medium">{{ item.label }}</span>
+            <div class="flex items-center gap-3">
+                <span class="font-display font-bold text-xl text-gradient">MeliFlow</span>
+            </div>
         }
-        
-        <!-- Tooltip for collapsed state -->
-        @if (isCollapsed()) {
-          <div class="absolute left-20 bg-neutral-900 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-            {{ item.label }}
-          </div>
-        }
-      </a>
-    }
-  </nav>
+    </div>
 
-  <!-- Toggle Button -->
-  <button 
-    (click)="toggleSidebar()"
-    class="absolute bottom-4 -right-3 w-6 h-6 bg-white border border-neutral-200 rounded-full shadow-sm hover:shadow-md transition-all flex items-center justify-center">
-    <span class="text-xs">{{ isCollapsed() ? '→' : '←' }}</span>
-  </button>
+    <!-- Navigation -->
+    <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+        @for (item of navItems; track item.route) {
+            <a
+                    [routerLink]="item.route"
+                    routerLinkActive="bg-honey-50 text-honey-700 font-medium"
+                    class="flex items-center gap-4 px-4 py-3 rounded-xl text-neutral-500 hover:bg-honey-50 hover:text-honey-600 transition-all duration-200 group relative"
+                    [class.justify-center]="isCollapsed()">
+                @if (!isCollapsed()) {
+                    <span class="font-medium">{{ item.label }}</span>
+                }
+
+                <!-- Tooltip for collapsed state -->
+                @if (isCollapsed()) {
+                    <div class="absolute left-16 bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                        {{ item.label }}
+                    </div>
+                }
+            </a>
+        }
+    </nav>
+
+    <!-- Footer actions -->
+    <div class="p-4 border-t border-neutral-100 mt-auto">
+        <button
+                (click)="toggleSidebar()"
+                class="w-full flex items-center px-4 py-3 rounded-xl text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700 transition-all duration-200"
+                [class.justify-center]="isCollapsed()">
+            @if (isCollapsed()) {
+                <span class="font-medium">Agrandir</span>
+            } @else {
+                <span class="font-medium">Réduire</span>
+            }
+        </button>
+    </div>
 </aside>
+
+<!-- Mobile Bottom Navbar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-neutral-200 z-50 px-4 py-2 flex justify-between items-center shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+    @for (item of navItems; track item.route) {
+        <a
+                [routerLink]="item.route"
+                routerLinkActive="text-honey-600"
+                class="flex flex-col items-center justify-center p-2 text-neutral-400 hover:text-honey-500 transition-colors">
+            <span class="text-[10px] font-medium">{{ item.label }}</span>
+        </a>
+    }
+</nav>
