@@ -28,7 +28,7 @@ export const routes: Routes = [
   },
   {
     path: 'alerts',
-    loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+    loadComponent: () => import('./pages/alerts/alerts-config.component').then(m => m.AlertsConfigComponent)
   },
   {
     path: 'config',
