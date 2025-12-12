@@ -1,0 +1,420 @@
+<div class="min-h-screen bg-neutral-50">
+  <!-- Breadcrumb -->
+  <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
+
+  @if (loading) {
+    <div class="flex justify-center items-center py-12">
+      <div class="text-neutral-500">Loading apiary details...</div>
+    </div>
+  }
+
+  @if (!loading && rucher) {
+    <!-- Page Header -->
+    <app-page-header
+      [title]="rucher.name"
+      [subtitle]="(rucher.address || 'Location: ' + rucher.location.coordinates[0][0][1] + ', ' + rucher.location.coordinates[0][0][0]) + (rucher.region ? ' | ' + rucher.region : '')"
+      icon="🏞️"
+      [showActions]="true">
+      <div actions class="flex gap-2">
+        <button class="btn btn-secondary" (click)="toggleEditModal()">
+          <span>✏️ Edit Apiary</span>
+        </button>
+        <button class="btn btn-secondary">
+          <span>➕ Add Hive</span>
+        </button>
+        <button class="btn btn-primary">
+          <span>📥 Export Data</span>
+        </button>
+      </div>
+    </app-page-header>
+
+    <!-- Main Content -->
+    <div class="p-8 space-y-6">
+
+      <!-- Summary Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <app-card>
+          <div class="p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm text-neutral-600">Status</span>
+              <span 
+                class="px-2 py-1 rounded-full text-xs font-medium"
+                [ngClass]="getStatusBadgeClass(rucher.status)">
+                {{ rucher.status | titlecase }}
+              </span>
+            </div>
+          </div>
+        </app-card>
+
+        <app-card>
+          <div class="p-4">
+            <div class="text-sm text-neutral-600 mb-1">Total Hives</div>
+            <div class="text-2xl font-bold text-neutral-900">{{ rucher.ruchesCount }}</div>
+            <div class="text-xs text-neutral-500 mt-1">{{ rucher.activeRuchesCount }} active</div>
+          </div>
+        </app-card>
+
+        <app-card>
+          <div class="p-4">
+            <div class="text-sm text-neutral-600 mb-1">Total Weight</div>
+            <div class="text-2xl font-bold text-neutral-900">
+              {{ rucher.totalWeight | number:'1.0-0' }} kg
+            </div>
+            <div class="text-xs text-neutral-500 mt-1">
+              Avg: {{ rucher.averageWeight | number:'1.1-1' }} kg
+            </div>
+          </div>
+        </app-card>
+
+        <app-card>
+          <div class="p-4">
+            <div class="text-sm text-neutral-600 mb-1">Weekly Gain</div>
+            <div class="text-2xl font-bold" [class.text-success]="rucher.weeklyGain > 0" [class.text-error]="rucher.weeklyGain < 0" [class.text-neutral-900]="rucher.weeklyGain === 0">
+              {{ rucher.weeklyGain > 0 ? '+' : '' }}{{ rucher.weeklyGain | number:'1.2-2' }} kg
+            </div>
+            <div class="text-xs text-neutral-500 mt-1">Last 7 days</div>
+          </div>
+        </app-card>
+
+        <app-card>
+          <div class="p-4">
+            <div class="text-sm text-neutral-600 mb-1">Total Gain</div>
+            <div class="text-2xl font-bold" [class.text-success]="getTotalGain() > 0" [class.text-error]="getTotalGain() < 0" [class.text-neutral-900]="getTotalGain() === 0">
+              {{ getTotalGain() > 0 ? '+' : '' }}{{ getTotalGain() | number:'1.2-2' }} kg
+            </div>
+            <div class="text-xs text-neutral-500 mt-1">All hives</div>
+          </div>
+        </app-card>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="border-b border-neutral-200">
+        <nav class="flex gap-8">
+          <button 
+            (click)="selectTab('overview')"
+            [class.border-honey-500]="selectedTab === 'overview'"
+            [class.text-honey-600]="selectedTab === 'overview'"
+            [class.border-transparent]="selectedTab !== 'overview'"
+            [class.text-neutral-600]="selectedTab !== 'overview'"
+            class="pb-4 px-1 border-b-2 font-medium text-sm hover:text-honey-600 transition-colors">
+            📊 Overview
+          </button>
+          <button 
+            (click)="selectTab('hives')"
+            [class.border-honey-500]="selectedTab === 'hives'"
+            [class.text-honey-600]="selectedTab === 'hives'"
+            [class.border-transparent]="selectedTab !== 'hives'"
+            [class.text-neutral-600]="selectedTab !== 'hives'"
+            class="pb-4 px-1 border-b-2 font-medium text-sm hover:text-honey-600 transition-colors">
+            🐝 Hives ({{ ruches.length }})
+          </button>
+          <button 
+            (click)="selectTab('statistics')"
+            [class.border-honey-500]="selectedTab === 'statistics'"
+            [class.text-honey-600]="selectedTab === 'statistics'"
+            [class.border-transparent]="selectedTab !== 'statistics'"
+            [class.text-neutral-600]="selectedTab !== 'statistics'"
+            class="pb-4 px-1 border-b-2 font-medium text-sm hover:text-honey-600 transition-colors">
+            📈 Statistics
+          </button>
+        </nav>
+      </div>
+
+      <!-- Overview Tab -->
+      @if (selectedTab === 'overview') {
+        <div class="space-y-6">
+          <!-- Map and Info Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Map View -->
+            <app-card [class.lg:col-span-2]="true">
+              <div class="p-6">
+                <h3 class="text-lg font-semibold text-neutral-900 mb-4">📍 Apiary Location</h3>
+                <div class="bg-neutral-100 h-96 rounded-lg flex items-center justify-center mb-4">
+                  <div class="text-center text-neutral-500">
+                    <div class="text-4xl mb-3">🗺️</div>
+                    <div class="text-lg font-medium mb-2">Map View with Hive Clusters</div>
+                    <div class="text-sm">
+                      Center: {{ rucher.location.coordinates[0][0][1] }}, {{ rucher.location.coordinates[0][0][0] }}
+                    </div>
+                    <div class="text-sm mt-2 text-neutral-400">
+                      Showing {{ ruches.length }} hives in this apiary
+                    </div>
+                  </div>
+                </div>
+                @if (rucher.address) {
+                  <div class="text-sm text-neutral-600">
+                    <strong>Address:</strong> {{ rucher.address }}
+                  </div>
+                }
+              </div>
+            </app-card>
+
+            <!-- Quick Stats -->
+            <app-card>
+              <div class="p-6">
+                <h3 class="text-lg font-semibold text-neutral-900 mb-4">⚡ Quick Stats</h3>
+                <div class="space-y-4">
+                  <div class="p-4 bg-success-light rounded-lg">
+                    <div class="text-sm text-neutral-600 mb-1">Active Hives</div>
+                    <div class="text-3xl font-bold text-neutral-900">
+                      {{ getActiveHives().length }}
+                    </div>
+                  </div>
+                  
+                  <div class="p-4 bg-warning-light rounded-lg">
+                    <div class="text-sm text-neutral-600 mb-1">Alerts</div>
+                    <div class="text-3xl font-bold text-neutral-900">
+                      {{ getAlertHives().length }}
+                    </div>
+                  </div>
+
+                  <div class="p-4 bg-error-light rounded-lg">
+                    <div class="text-sm text-neutral-600 mb-1">Offline</div>
+                    <div class="text-3xl font-bold text-neutral-900">
+                      {{ getOfflineHives().length }}
+                    </div>
+                  </div>
+
+                  <div class="pt-4 border-t border-neutral-200">
+                    <div class="text-sm text-neutral-600">Created</div>
+                    <div class="text-sm font-medium text-neutral-900 mt-1">
+                      {{ formatDate(rucher.createdAt) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </app-card>
+          </div>
+
+          <!-- Recent Activity -->
+          <app-section-title
+            title="Production Trends"
+            subtitle="Weight evolution across all hives"
+            icon="📈">
+          </app-section-title>
+
+          <app-card>
+            <app-chart
+              title="Global Gain Evolution"
+              [type]="'line'"
+              height="350px">
+            </app-chart>
+          </app-card>
+        </div>
+      }
+
+      <!-- Hives Tab -->
+      @if (selectedTab === 'hives') {
+        <div class="space-y-6">
+          <app-section-title
+            title="Hives in this Apiary"
+            [subtitle]="ruches.length + ' hives total'"
+            icon="🐝">
+          </app-section-title>
+
+          @if (ruches.length === 0) {
+            <app-card>
+              <div class="text-center py-12">
+                <span class="text-6xl block mb-4">🐝</span>
+                <h3 class="text-xl font-semibold text-neutral-900 mb-2">No hives yet</h3>
+                <p class="text-neutral-600 mb-4">Add hives to this apiary to start monitoring</p>
+                <button class="btn btn-primary">
+                  <span>➕ Add First Hive</span>
+                </button>
+              </div>
+            </app-card>
+          }
+
+          @if (ruches.length > 0) {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              @for (ruche of ruches; track ruche.id) {
+                <app-card [hoverable]="true" (click)="viewRucheDetail(ruche)">
+                  <div class="p-6 cursor-pointer">
+                    <!-- Header -->
+                    <div class="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 class="text-lg font-semibold text-neutral-900">{{ ruche.name }}</h3>
+                        <p class="text-sm text-neutral-500">{{ ruche.id }}</p>
+                      </div>
+                      <span 
+                        class="px-3 py-1 rounded-full text-xs font-medium"
+                        [ngClass]="getStatusBadgeClass(ruche.status)">
+                        {{ ruche.status | titlecase }}
+                      </span>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <p class="text-xs text-neutral-500 mb-1">Weight</p>
+                        <p class="text-lg font-semibold text-neutral-900">
+                          {{ ruche.currentWeight ? (ruche.currentWeight | number:'1.1-1') + ' kg' : 'N/A' }}
+                        </p>
+                      </div>
+                      <div>
+                        <p class="text-xs text-neutral-500 mb-1">Filling</p>
+                        <p class="text-lg font-semibold text-neutral-900">
+                          {{ ruche.fillingPercentage ? (ruche.fillingPercentage | number:'1.0-0') + '%' : 'N/A' }}
+                        </p>
+                      </div>
+                      <div>
+                        <p class="text-xs text-neutral-500 mb-1">Daily Gain</p>
+                        <p class="text-lg font-semibold" 
+                           [class.text-success]="(ruche.dailyGain || 0) > 0"
+                           [class.text-error]="(ruche.dailyGain || 0) < 0"
+                           [class.text-neutral-900]="(ruche.dailyGain || 0) === 0">
+                          {{ ruche.dailyGain ? (ruche.dailyGain > 0 ? '+' : '') + (ruche.dailyGain | number:'1.2-2') : '0.00' }} kg
+                        </p>
+                      </div>
+                      <div>
+                        <p class="text-xs text-neutral-500 mb-1">Weekly Gain</p>
+                        <p class="text-lg font-semibold" 
+                           [class.text-success]="(ruche.weeklyGain || 0) > 0"
+                           [class.text-error]="(ruche.weeklyGain || 0) < 0"
+                           [class.text-neutral-900]="(ruche.weeklyGain || 0) === 0">
+                          {{ ruche.weeklyGain ? (ruche.weeklyGain > 0 ? '+' : '') + (ruche.weeklyGain | number:'1.2-2') : '0.00' }} kg
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Battery and Signal -->
+                    <div class="flex items-center justify-between pt-4 border-t border-neutral-200">
+                      <div class="flex items-center gap-2 text-sm">
+                        <span>🔋</span>
+                        <span class="text-neutral-700">{{ ruche.batteryLevel }}%</span>
+                      </div>
+                      <div class="flex items-center gap-2 text-sm">
+                        <span>📶</span>
+                        <span class="text-neutral-700">{{ ruche.signalStrength }}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </app-card>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Statistics Tab -->
+      @if (selectedTab === 'statistics') {
+        <div class="space-y-6">
+          <app-section-title
+            title="Detailed Statistics"
+            subtitle="Performance metrics for this apiary"
+            icon="📊">
+          </app-section-title>
+
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <app-card>
+              <div class="p-6">
+                <div class="text-sm text-neutral-600 mb-2">Average Weight</div>
+                <div class="text-3xl font-bold text-neutral-900 mb-1">
+                  {{ rucher.averageWeight | number:'1.1-1' }} kg
+                </div>
+                <div class="text-xs text-neutral-500">Per hive</div>
+              </div>
+            </app-card>
+
+            <app-card>
+              <div class="p-6">
+                <div class="text-sm text-neutral-600 mb-2">Average Daily Gain</div>
+                <div class="text-3xl font-bold" 
+                     [class.text-success]="getAverageDailyGain() > 0"
+                     [class.text-error]="getAverageDailyGain() < 0"
+                     [class.text-neutral-900]="getAverageDailyGain() === 0">
+                  {{ getAverageDailyGain() > 0 ? '+' : '' }}{{ getAverageDailyGain() | number:'1.2-2' }} kg
+                </div>
+                <div class="text-xs text-neutral-500">Per hive</div>
+              </div>
+            </app-card>
+
+            <app-card>
+              <div class="p-6">
+                <div class="text-sm text-neutral-600 mb-2">Productivity Rate</div>
+                <div class="text-3xl font-bold text-neutral-900 mb-1">
+                  {{ rucher.activeRuchesCount > 0 ? ((rucher.activeRuchesCount / rucher.ruchesCount) * 100 | number:'1.0-0') : 0 }}%
+                </div>
+                <div class="text-xs text-neutral-500">Active hives</div>
+              </div>
+            </app-card>
+
+            <app-card>
+              <div class="p-6">
+                <div class="text-sm text-neutral-600 mb-2">Total Gain</div>
+                <div class="text-3xl font-bold" 
+                     [class.text-success]="getTotalGain() > 0"
+                     [class.text-error]="getTotalGain() < 0"
+                     [class.text-neutral-900]="getTotalGain() === 0">
+                  {{ getTotalGain() > 0 ? '+' : '' }}{{ getTotalGain() | number:'1.1-1' }} kg
+                </div>
+                <div class="text-xs text-neutral-500">All time</div>
+              </div>
+            </app-card>
+          </div>
+
+          <!-- Comparison Table -->
+          <app-card>
+            <div class="p-6">
+              <h3 class="text-lg font-semibold text-neutral-900 mb-4">Hive Performance Comparison</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead class="bg-neutral-50 border-b border-neutral-200">
+                    <tr>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Hive</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Weight</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Daily Gain</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Weekly Gain</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Total Gain</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-neutral-200">
+                    @for (ruche of ruches; track ruche.id) {
+                      <tr class="hover:bg-neutral-50 cursor-pointer" (click)="viewRucheDetail(ruche)">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="text-sm font-medium text-neutral-900">{{ ruche.name }}</div>
+                          <div class="text-xs text-neutral-500">{{ ruche.id }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                          {{ ruche.currentWeight ? (ruche.currentWeight | number:'1.1-1') + ' kg' : 'N/A' }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                            [class.text-success]="(ruche.dailyGain || 0) > 0"
+                            [class.text-error]="(ruche.dailyGain || 0) < 0"
+                            [class.text-neutral-900]="(ruche.dailyGain || 0) === 0">
+                          {{ ruche.dailyGain ? (ruche.dailyGain > 0 ? '+' : '') + (ruche.dailyGain | number:'1.2-2') : '0.00' }} kg
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                            [class.text-success]="(ruche.weeklyGain || 0) > 0"
+                            [class.text-error]="(ruche.weeklyGain || 0) < 0"
+                            [class.text-neutral-900]="(ruche.weeklyGain || 0) === 0">
+                          {{ ruche.weeklyGain ? (ruche.weeklyGain > 0 ? '+' : '') + (ruche.weeklyGain | number:'1.2-2') : '0.00' }} kg
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                            [class.text-success]="(ruche.totalGain || 0) > 0"
+                            [class.text-error]="(ruche.totalGain || 0) < 0"
+                            [class.text-neutral-900]="(ruche.totalGain || 0) === 0">
+                          {{ ruche.totalGain ? (ruche.totalGain > 0 ? '+' : '') + (ruche.totalGain | number:'1.2-2') : '0.00' }} kg
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span 
+                            class="px-2 py-1 rounded-full text-xs font-medium"
+                            [ngClass]="getStatusBadgeClass(ruche.status)">
+                            {{ ruche.status | titlecase }}
+                          </span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </app-card>
+        </div>
+      }
+
+    </div>
+  }
+</div>

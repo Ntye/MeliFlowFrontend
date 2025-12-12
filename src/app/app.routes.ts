@@ -20,7 +20,11 @@ export const routes: Routes = [
   },
   {
     path: 'apiaries',
-    loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+    loadComponent: () => import('./pages/ruchers/ruchers-list.component').then(m => m.RuchersListComponent)
+  },
+  {
+    path: 'apiaries/:id',
+    loadComponent: () => import('./pages/ruchers/rucher-detail.component').then(m => m.RucherDetailComponent)
   },
   {
     path: 'alerts',
