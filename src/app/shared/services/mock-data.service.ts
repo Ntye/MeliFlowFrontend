@@ -253,7 +253,7 @@ export class MockDataService {
 
     const hasAlerts = rucherRuches.some(r => r.status === 'alert');
     const hasOffline = rucherRuches.some(r => r.status === 'offline');
-    const status: 'healthy' | 'warning' | 'critical' = hasOffline || hasAlerts ? 'warning' : 'healthy';
+    const status: 'healthy' | 'warning' | 'critical' = hasOffline ? 'critical' : hasAlerts ? 'warning' : 'healthy';
 
     return of({
       ...rucher,
@@ -281,7 +281,7 @@ export class MockDataService {
 
       const hasAlerts = rucherRuches.some(r => r.status === 'alert');
       const hasOffline = rucherRuches.some(r => r.status === 'offline');
-      const status: 'healthy' | 'warning' | 'critical' = hasOffline || hasAlerts ? 'warning' : 'healthy';
+      const status: 'healthy' | 'warning' | 'critical' = hasOffline ? 'critical' : hasAlerts ? 'warning' : 'healthy';
 
       return {
         ...rucher,

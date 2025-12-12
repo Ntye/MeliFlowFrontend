@@ -58,12 +58,9 @@ export class RucherDetailComponent implements OnInit {
         this.rucher = rucher;
         this.breadcrumbs[2] = { label: rucher.name, icon: '🏞️' };
 
-        // Load ruches belonging to this rucher
-        this.mockDataService.getRuchesByRucherId(id).subscribe(ruches => {
-          // Get ruches with stats
-          this.mockDataService.getRuchesWithStats().subscribe(allRuches => {
-            this.ruches = allRuches.filter(r => r.rucherId === id);
-          });
+        // Load ruches with stats for this rucher
+        this.mockDataService.getRuchesWithStats().subscribe(allRuches => {
+          this.ruches = allRuches.filter(r => r.rucherId === id);
         });
       } else {
         this.router.navigate(['/apiaries']);

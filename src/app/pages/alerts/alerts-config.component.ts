@@ -143,6 +143,7 @@ export class AlertsConfigComponent implements OnInit {
   }
 
   deleteRule(rule: AlertRule): void {
+    // TODO: Replace with custom confirmation modal for better UX
     if (confirm(`Are you sure you want to delete the rule "${rule.name}"?`)) {
       this.mockDataService.deleteAlertRule(rule.id).subscribe(success => {
         if (success) {
@@ -164,6 +165,7 @@ export class AlertsConfigComponent implements OnInit {
   }
 
   testAlert(rule: AlertRule): void {
+    // TODO: Replace with toast notification system for better UX
     alert(`Test notification sent for rule: ${rule.name}\nThis would send a test message to the configured channels.`);
   }
 

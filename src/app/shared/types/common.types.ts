@@ -133,7 +133,7 @@ export interface AlertConfig {
 // Chart and Table Types
 
 export interface ChartDataPoint {
-  timestamp: Date | string;
+  timestamp: Date;
   value: number;
   label?: string;
 }
