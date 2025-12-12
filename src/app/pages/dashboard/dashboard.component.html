@@ -58,6 +58,39 @@
       }
     </div>
 
+    <!-- Active Alerts Section -->
+    @if (activeAlerts.length > 0) {
+      <app-section-title
+        title="Active Alerts"
+        [subtitle]="activeAlerts.length + ' alerts require attention'"
+        icon="⚠️">
+      </app-section-title>
+
+      <div class="space-y-3">
+        @for (alert of activeAlerts; track alert.id) {
+          <app-card>
+            <div class="p-4 flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <span 
+                  class="text-2xl"
+                  [class.text-warning]="alert.severity === 'warning'"
+                  [class.text-error]="alert.severity === 'critical'">
+                  {{ alert.severity === 'critical' ? '🔴' : '⚠️' }}
+                </span>
+                <div>
+                  <h4 class="font-semibold text-neutral-900">{{ alert.message }}</h4>
+                  <p class="text-sm text-neutral-600">Triggered: {{ formatDate(alert.triggeredAt) }}</p>
+                </div>
+              </div>
+              <button class="btn btn-secondary" (click)="navigateTo('/alerts')">
+                <span>View →</span>
+              </button>
+            </div>
+          </app-card>
+        }
+      </div>
+    }
+
     <!-- Quick Actions -->
     <app-section-title
       title="Quick Actions"
@@ -66,24 +99,24 @@
     </app-section-title>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <app-card [hoverable]="true">
-        <div class="text-center py-6">
+      <app-card [hoverable]="true" (click)="navigateTo('/hives')">
+        <div class="text-center py-6 cursor-pointer">
           <span class="text-4xl mb-3 block">🐝</span>
           <h3 class="font-semibold text-neutral-900 mb-2">Manage Hives</h3>
           <p class="text-sm text-neutral-500">View and manage all your hives</p>
         </div>
       </app-card>
 
-      <app-card [hoverable]="true">
-        <div class="text-center py-6">
+      <app-card [hoverable]="true" (click)="navigateTo('/apiaries')">
+        <div class="text-center py-6 cursor-pointer">
           <span class="text-4xl mb-3 block">🏞️</span>
           <h3 class="font-semibold text-neutral-900 mb-2">Manage Apiaries</h3>
           <p class="text-sm text-neutral-500">View and organize your apiaries</p>
         </div>
       </app-card>
 
-      <app-card [hoverable]="true">
-        <div class="text-center py-6">
+      <app-card [hoverable]="true" (click)="navigateTo('/alerts')">
+        <div class="text-center py-6 cursor-pointer">
           <span class="text-4xl mb-3 block">🔔</span>
           <h3 class="font-semibold text-neutral-900 mb-2">Configure Alerts</h3>
           <p class="text-sm text-neutral-500">Set up monitoring alerts</p>
