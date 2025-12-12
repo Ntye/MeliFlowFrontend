@@ -1,0 +1,430 @@
+<div class="min-h-screen bg-neutral-50">
+  <!-- Breadcrumb -->
+  <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
+
+  @if (loading) {
+    <div class="flex justify-center items-center py-12">
+      <div class="text-neutral-500">Loading hive details...</div>
+    </div>
+  }
+
+  @if (!loading && ruche) {
+    <!-- Page Header -->
+    <app-page-header
+      [title]="ruche.name"
+      [subtitle]="'ID: ' + ruche.id + (rucher ? ' | ' + rucher.name : '')"
+      icon="🐝"
+      [showActions]="true">
+      <div actions class="flex gap-2">
+        <button class="btn btn-secondary" (click)="toggleQRCode()">
+          <span>{{ showQRCode ? '✕ Close QR' : '⊞ Show QR Code' }}</span>
+        </button>
+        <button class="btn btn-secondary" (click)="navigateToRucher()">
+          <span>🏞️ View Apiary</span>
+        </button>
+        <button class="btn btn-primary">
+          <span>✏️ Edit Hive</span>
+        </button>
+      </div>
+    </app-page-header>
+
+    <!-- Main Content -->
+    <div class="p-8 space-y-6">
+      
+      <!-- QR Code Modal -->
+      @if (showQRCode) {
+        <app-card>
+          <div class="p-6 text-center">
+            <h3 class="text-lg font-semibold text-neutral-900 mb-4">Hive QR Code</h3>
+            <div class="bg-white border-2 border-neutral-200 p-4 inline-block rounded-lg mb-4">
+              <div class="w-48 h-48 flex items-center justify-center bg-neutral-100">
+                <div class="text-xs text-neutral-500 text-center p-4">
+                  QR Code for:<br>{{ generateQRCodeData() }}
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-neutral-600">
+              Scan this QR code to quickly access this hive on mobile devices
+            </p>
+          </div>
+        </app-card>
+      }
+
+      <!-- Summary Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <app-card>
+          <div class="p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm text-neutral-600">Status</span>
+              <span 
+                class="px-2 py-1 rounded-full text-xs font-medium"
+                [ngClass]="getStatusBadgeClass(ruche.status)">
+                {{ ruche.status | titlecase }}
+              </span>
+            </div>
+          </div>
+        </app-card>
+
+        <app-card>
+          <div class="p-4">
+            <div class="text-sm text-neutral-600 mb-1">Current Weight</div>
+            <div class="text-2xl font-bold text-neutral-900">
+              {{ ruche.currentWeight ? (ruche.currentWeight | number:'1.1-1') : '0.0' }} kg
+            </div>
+            <div class="text-xs text-neutral-500 mt-1">
+              Filling: {{ ruche.fillingPercentage ? (ruche.fillingPercentage | number:'1.0-0') : '0' }}%
+            </div>
+          </div>
+        </app-card>
+
+        <app-card>
+          <div class="p-4">
+            <div class="text-sm text-neutral-600 mb-1">Daily Gain</div>
+            <div class="text-2xl font-bold" [class.text-success]="(ruche.dailyGain || 0) > 0" [class.text-error]="(ruche.dailyGain || 0) < 0" [class.text-neutral-900]="(ruche.dailyGain || 0) === 0">
+              {{ ruche.dailyGain ? (ruche.dailyGain > 0 ? '+' : '') + (ruche.dailyGain | number:'1.2-2') : '0.00' }} kg
+            </div>
+            <div class="text-xs text-neutral-500 mt-1">Last 24 hours</div>
+          </div>
+        </app-card>
+
+        <app-card>
+          <div class="p-4">
+            <div class="text-sm text-neutral-600 mb-1">Weekly Gain</div>
+            <div class="text-2xl font-bold" [class.text-success]="(ruche.weeklyGain || 0) > 0" [class.text-error]="(ruche.weeklyGain || 0) < 0" [class.text-neutral-900]="(ruche.weeklyGain || 0) === 0">
+              {{ ruche.weeklyGain ? (ruche.weeklyGain > 0 ? '+' : '') + (ruche.weeklyGain | number:'1.2-2') : '0.00' }} kg
+            </div>
+            <div class="text-xs text-neutral-500 mt-1">Last 7 days</div>
+          </div>
+        </app-card>
+
+        <app-card>
+          <div class="p-4">
+            <div class="text-sm text-neutral-600 mb-1">Total Gain</div>
+            <div class="text-2xl font-bold" [class.text-success]="(ruche.totalGain || 0) > 0" [class.text-error]="(ruche.totalGain || 0) < 0" [class.text-neutral-900]="(ruche.totalGain || 0) === 0">
+              {{ ruche.totalGain ? (ruche.totalGain > 0 ? '+' : '') + (ruche.totalGain | number:'1.2-2') : '0.00' }} kg
+            </div>
+            <div class="text-xs text-neutral-500 mt-1">Since creation</div>
+          </div>
+        </app-card>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="border-b border-neutral-200">
+        <nav class="flex gap-8">
+          <button 
+            (click)="selectTab('overview')"
+            [class.border-honey-500]="selectedTab === 'overview'"
+            [class.text-honey-600]="selectedTab === 'overview'"
+            [class.border-transparent]="selectedTab !== 'overview'"
+            [class.text-neutral-600]="selectedTab !== 'overview'"
+            class="pb-4 px-1 border-b-2 font-medium text-sm hover:text-honey-600 transition-colors">
+            📊 Overview
+          </button>
+          <button 
+            (click)="selectTab('measurements')"
+            [class.border-honey-500]="selectedTab === 'measurements'"
+            [class.text-honey-600]="selectedTab === 'measurements'"
+            [class.border-transparent]="selectedTab !== 'measurements'"
+            [class.text-neutral-600]="selectedTab !== 'measurements'"
+            class="pb-4 px-1 border-b-2 font-medium text-sm hover:text-honey-600 transition-colors">
+            📋 Measurements
+          </button>
+          <button 
+            (click)="selectTab('comparison')"
+            [class.border-honey-500]="selectedTab === 'comparison'"
+            [class.text-honey-600]="selectedTab === 'comparison'"
+            [class.border-transparent]="selectedTab !== 'comparison'"
+            [class.text-neutral-600]="selectedTab !== 'comparison'"
+            class="pb-4 px-1 border-b-2 font-medium text-sm hover:text-honey-600 transition-colors">
+            📊 Comparison
+          </button>
+        </nav>
+      </div>
+
+      <!-- Overview Tab -->
+      @if (selectedTab === 'overview') {
+        <div class="space-y-6">
+          <!-- Location and Info Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Mini Map -->
+            <app-card>
+              <div class="p-6">
+                <h3 class="text-lg font-semibold text-neutral-900 mb-4">📍 Location</h3>
+                <div class="bg-neutral-100 h-48 rounded-lg flex items-center justify-center mb-4">
+                  <div class="text-center text-neutral-500 text-sm">
+                    <div class="text-3xl mb-2">🗺️</div>
+                    <div>Map View</div>
+                    <div class="text-xs mt-1">
+                      {{ ruche.location.coordinates[1] }}, {{ ruche.location.coordinates[0] }}
+                    </div>
+                  </div>
+                </div>
+                @if (rucher) {
+                  <div class="text-sm text-neutral-600">
+                    <strong>Apiary:</strong> {{ rucher.name }}
+                  </div>
+                }
+              </div>
+            </app-card>
+
+            <!-- Device Info -->
+            <app-card>
+              <div class="p-6">
+                <h3 class="text-lg font-semibold text-neutral-900 mb-4">⚙️ Device Status</h3>
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm text-neutral-600">Battery Level</span>
+                    <span class="text-sm font-medium text-neutral-900">🔋 {{ ruche.batteryLevel }}%</span>
+                  </div>
+                  <div class="w-full bg-neutral-200 rounded-full h-2">
+                    <div 
+                      class="h-2 rounded-full transition-all"
+                      [class.bg-success]="ruche.batteryLevel > 50"
+                      [class.bg-warning]="ruche.batteryLevel > 20 && ruche.batteryLevel <= 50"
+                      [class.bg-error]="ruche.batteryLevel <= 20"
+                      [style.width.%]="ruche.batteryLevel">
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm text-neutral-600">Signal Strength</span>
+                    <span class="text-sm font-medium text-neutral-900">📶 {{ ruche.signalStrength }}%</span>
+                  </div>
+                  <div class="w-full bg-neutral-200 rounded-full h-2">
+                    <div 
+                      class="h-2 rounded-full transition-all"
+                      [class.bg-success]="ruche.signalStrength > 50"
+                      [class.bg-warning]="ruche.signalStrength > 20 && ruche.signalStrength <= 50"
+                      [class.bg-error]="ruche.signalStrength <= 20"
+                      [style.width.%]="ruche.signalStrength">
+                    </div>
+                  </div>
+
+                  <div class="pt-4 border-t border-neutral-200">
+                    <div class="text-sm text-neutral-600">Last Update</div>
+                    <div class="text-sm font-medium text-neutral-900 mt-1">
+                      {{ formatDate(ruche.lastUpdate) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </app-card>
+
+            <!-- Current Conditions -->
+            <app-card>
+              <div class="p-6">
+                <h3 class="text-lg font-semibold text-neutral-900 mb-4">🌡️ Current Conditions</h3>
+                <div class="space-y-4">
+                  <div class="p-4 bg-info-light rounded-lg">
+                    <div class="text-sm text-neutral-600 mb-1">Temperature</div>
+                    <div class="text-3xl font-bold text-neutral-900">
+                      {{ ruche.currentTemperature ? (ruche.currentTemperature | number:'1.1-1') : 'N/A' }}°C
+                    </div>
+                  </div>
+                  
+                  <div class="p-4 bg-success-light rounded-lg">
+                    <div class="text-sm text-neutral-600 mb-1">Humidity</div>
+                    <div class="text-3xl font-bold text-neutral-900">
+                      {{ ruche.currentHumidity ? (ruche.currentHumidity | number:'1.0-0') : 'N/A' }}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </app-card>
+          </div>
+
+          <!-- Charts -->
+          <app-section-title
+            title="Time Series Data"
+            subtitle="Historical measurements over the last 30 days"
+            icon="📈">
+          </app-section-title>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <app-card>
+              <app-chart
+                title="Weight Evolution"
+                [type]="'line'"
+                height="300px">
+              </app-chart>
+            </app-card>
+
+            <app-card>
+              <app-chart
+                title="Temperature Trends"
+                [type]="'line'"
+                height="300px">
+              </app-chart>
+            </app-card>
+
+            <app-card>
+              <app-chart
+                title="Humidity Levels"
+                [type]="'line'"
+                height="300px">
+              </app-chart>
+            </app-card>
+
+            <app-card>
+              <app-chart
+                title="Signal Quality"
+                [type]="'line'"
+                height="300px">
+              </app-chart>
+            </app-card>
+          </div>
+        </div>
+      }
+
+      <!-- Measurements Tab -->
+      @if (selectedTab === 'measurements') {
+        <div class="space-y-6">
+          <app-section-title
+            title="Recent Measurements"
+            subtitle="Latest sensor readings"
+            icon="📋">
+          </app-section-title>
+
+          <app-card>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-neutral-50 border-b border-neutral-200">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Timestamp</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Weight (kg)</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Temperature (°C)</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Humidity (%)</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Signal (%)</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-neutral-200">
+                  @for (measurement of recentMeasurements; track measurement.id) {
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                        {{ formatShortDate(measurement.timestamp) }}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                        {{ measurement.weight | number:'1.2-2' }}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                        {{ measurement.temperature | number:'1.1-1' }}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                        {{ measurement.humidity | number:'1.0-0' }}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                        {{ measurement.signal | number:'1.0-0' }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </app-card>
+
+          <div class="text-center">
+            <button class="btn btn-secondary">
+              <span>📥 Download Full History</span>
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Comparison Tab -->
+      @if (selectedTab === 'comparison') {
+        <div class="space-y-6">
+          <app-section-title
+            title="Compare with Other Hives"
+            subtitle="Performance comparison across your apiaries"
+            icon="📊">
+          </app-section-title>
+
+          <app-card>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-neutral-50 border-b border-neutral-200">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Hive</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Weight</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Daily Gain</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Weekly Gain</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Filling %</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-neutral-200">
+                  <!-- Current Hive (Highlighted) -->
+                  <tr class="bg-honey-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm font-medium text-neutral-900">{{ ruche.name }} ⭐</div>
+                      <div class="text-xs text-neutral-500">Current Hive</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span 
+                        class="px-2 py-1 rounded-full text-xs font-medium"
+                        [ngClass]="getStatusBadgeClass(ruche.status)">
+                        {{ ruche.status | titlecase }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-900">
+                      {{ ruche.currentWeight ? (ruche.currentWeight | number:'1.1-1') : 'N/A' }} kg
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" 
+                        [class.text-success]="(ruche.dailyGain || 0) > 0" 
+                        [class.text-error]="(ruche.dailyGain || 0) < 0">
+                      {{ ruche.dailyGain ? (ruche.dailyGain > 0 ? '+' : '') + (ruche.dailyGain | number:'1.2-2') : '0.00' }} kg
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" 
+                        [class.text-success]="(ruche.weeklyGain || 0) > 0" 
+                        [class.text-error]="(ruche.weeklyGain || 0) < 0">
+                      {{ ruche.weeklyGain ? (ruche.weeklyGain > 0 ? '+' : '') + (ruche.weeklyGain | number:'1.2-2') : '0.00' }} kg
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-900">
+                      {{ ruche.fillingPercentage ? (ruche.fillingPercentage | number:'1.0-0') : '0' }}%
+                    </td>
+                  </tr>
+
+                  <!-- Other Hives -->
+                  @for (otherRuche of getComparisonRuches(); track otherRuche.id) {
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-neutral-900">{{ otherRuche.name }}</div>
+                        <div class="text-xs text-neutral-500">{{ otherRuche.id }}</div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span 
+                          class="px-2 py-1 rounded-full text-xs font-medium"
+                          [ngClass]="getStatusBadgeClass(otherRuche.status)">
+                          {{ otherRuche.status | titlecase }}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                        {{ otherRuche.currentWeight ? (otherRuche.currentWeight | number:'1.1-1') : 'N/A' }} kg
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm" 
+                          [class.text-success]="(otherRuche.dailyGain || 0) > 0" 
+                          [class.text-error]="(otherRuche.dailyGain || 0) < 0"
+                          [class.text-neutral-900]="(otherRuche.dailyGain || 0) === 0">
+                        {{ otherRuche.dailyGain ? (otherRuche.dailyGain > 0 ? '+' : '') + (otherRuche.dailyGain | number:'1.2-2') : '0.00' }} kg
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm" 
+                          [class.text-success]="(otherRuche.weeklyGain || 0) > 0" 
+                          [class.text-error]="(otherRuche.weeklyGain || 0) < 0"
+                          [class.text-neutral-900]="(otherRuche.weeklyGain || 0) === 0">
+                        {{ otherRuche.weeklyGain ? (otherRuche.weeklyGain > 0 ? '+' : '') + (otherRuche.weeklyGain | number:'1.2-2') : '0.00' }} kg
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                        {{ otherRuche.fillingPercentage ? (otherRuche.fillingPercentage | number:'1.0-0') : '0' }}%
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </app-card>
+        </div>
+      }
+
+    </div>
+  }
+</div>

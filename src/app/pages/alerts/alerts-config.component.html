@@ -1,0 +1,484 @@
+<div class="min-h-screen bg-neutral-50">
+  <!-- Breadcrumb -->
+  <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
+
+  <!-- Page Header -->
+  <app-page-header
+    title="Alerts Configuration"
+    subtitle="Manage alert rules and notification settings"
+    icon="🔔"
+    [showActions]="true">
+    <div actions class="flex gap-2">
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <span>➕ Create Alert Rule</span>
+      </button>
+    </div>
+  </app-page-header>
+
+  <!-- Main Content -->
+  <div class="p-8 space-y-6">
+
+    <!-- Active Alerts Banner -->
+    @if (getActiveAlertsCount() > 0) {
+      <app-card>
+        <div class="p-4 bg-warning-light border-l-4 border-warning">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">⚠️</span>
+              <div>
+                <h3 class="font-semibold text-neutral-900">Active Alerts</h3>
+                <p class="text-sm text-neutral-600">You have {{ getActiveAlertsCount() }} unresolved alerts</p>
+              </div>
+            </div>
+            <button class="btn btn-secondary" (click)="selectTab('history')">
+              <span>View Alerts →</span>
+            </button>
+          </div>
+        </div>
+      </app-card>
+    }
+
+    <!-- Tabs Navigation -->
+    <div class="border-b border-neutral-200">
+      <nav class="flex gap-8">
+        <button 
+          (click)="selectTab('rules')"
+          [class.border-honey-500]="selectedTab === 'rules'"
+          [class.text-honey-600]="selectedTab === 'rules'"
+          [class.border-transparent]="selectedTab !== 'rules'"
+          [class.text-neutral-600]="selectedTab !== 'rules'"
+          class="pb-4 px-1 border-b-2 font-medium text-sm hover:text-honey-600 transition-colors">
+          ⚙️ Alert Rules ({{ alertRules.length }})
+        </button>
+        <button 
+          (click)="selectTab('history')"
+          [class.border-honey-500]="selectedTab === 'history'"
+          [class.text-honey-600]="selectedTab === 'history'"
+          [class.border-transparent]="selectedTab !== 'history'"
+          [class.text-neutral-600]="selectedTab !== 'history'"
+          class="pb-4 px-1 border-b-2 font-medium text-sm hover:text-honey-600 transition-colors">
+          📋 Alert History
+        </button>
+      </nav>
+    </div>
+
+    <!-- Rules Tab -->
+    @if (selectedTab === 'rules') {
+      <div class="space-y-6">
+        <app-section-title
+          title="Alert Rules"
+          subtitle="Configure monitoring rules and notifications"
+          icon="⚙️">
+        </app-section-title>
+
+        @if (loading) {
+          <div class="flex justify-center items-center py-12">
+            <div class="text-neutral-500">Loading alert rules...</div>
+          </div>
+        }
+
+        @if (!loading && alertRules.length === 0) {
+          <app-card>
+            <div class="text-center py-12">
+              <span class="text-6xl block mb-4">🔔</span>
+              <h3 class="text-xl font-semibold text-neutral-900 mb-2">No alert rules configured</h3>
+              <p class="text-neutral-600 mb-4">Create your first alert rule to start monitoring</p>
+              <button class="btn btn-primary" (click)="openCreateModal()">
+                <span>➕ Create First Rule</span>
+              </button>
+            </div>
+          </app-card>
+        }
+
+        @if (!loading && alertRules.length > 0) {
+          <div class="space-y-4">
+            @for (rule of alertRules; track rule.id) {
+              <app-card>
+                <div class="p-6">
+                  <div class="flex items-start justify-between">
+                    <!-- Rule Info -->
+                    <div class="flex-1">
+                      <div class="flex items-center gap-3 mb-2">
+                        <h3 class="text-lg font-semibold text-neutral-900">{{ rule.name }}</h3>
+                        <span 
+                          class="px-2 py-1 rounded-full text-xs font-medium"
+                          [class.bg-success-light]="rule.enabled"
+                          [class.text-success-dark]="rule.enabled"
+                          [class.bg-neutral-200]="!rule.enabled"
+                          [class.text-neutral-600]="!rule.enabled">
+                          {{ rule.enabled ? 'Enabled' : 'Disabled' }}
+                        </span>
+                      </div>
+
+                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span class="text-neutral-600">Type:</span>
+                          <span class="ml-2 font-medium text-neutral-900">{{ getAlertTypeLabel(rule.type) }}</span>
+                        </div>
+                        <div>
+                          <span class="text-neutral-600">Threshold:</span>
+                          <span class="ml-2 font-medium text-neutral-900">{{ rule.threshold }}</span>
+                        </div>
+                        <div>
+                          <span class="text-neutral-600">Hive:</span>
+                          <span class="ml-2 font-medium text-neutral-900">{{ getRucheNameById(rule.rucheId) }}</span>
+                        </div>
+                        <div>
+                          <span class="text-neutral-600">Channels:</span>
+                          <span class="ml-2 font-medium text-neutral-900">
+                            @for (channel of rule.notificationChannels; track channel) {
+                              <span class="mr-2">{{ channel === 'in_app' ? '📱 In-App' : '📞 WhatsApp' }}</span>
+                            }
+                          </span>
+                        </div>
+                      </div>
+
+                      @if (rule.whatsappNumber) {
+                        <div class="mt-2 text-sm text-neutral-600">
+                          WhatsApp: {{ rule.whatsappNumber }}
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2 ml-4">
+                      <button 
+                        class="px-3 py-2 text-sm border border-neutral-300 rounded-lg hover:bg-neutral-50"
+                        (click)="testAlert(rule)">
+                        🧪 Test
+                      </button>
+                      <button 
+                        class="px-3 py-2 text-sm border border-neutral-300 rounded-lg hover:bg-neutral-50"
+                        (click)="openEditModal(rule)">
+                        ✏️ Edit
+                      </button>
+                      <button 
+                        class="px-3 py-2 text-sm border border-neutral-300 rounded-lg hover:bg-neutral-50"
+                        [class.bg-success-light]="!rule.enabled"
+                        [class.bg-neutral-200]="rule.enabled"
+                        (click)="toggleRuleEnabled(rule)">
+                        {{ rule.enabled ? '⏸️ Disable' : '▶️ Enable' }}
+                      </button>
+                      <button 
+                        class="px-3 py-2 text-sm border border-error text-error rounded-lg hover:bg-error-light"
+                        (click)="deleteRule(rule)">
+                        🗑️ Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </app-card>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- History Tab -->
+    @if (selectedTab === 'history') {
+      <div class="space-y-6">
+        <app-section-title
+          title="Alert History"
+          subtitle="Recent triggered alerts and their status"
+          icon="📋">
+        </app-section-title>
+
+        @if (recentAlerts.length === 0) {
+          <app-card>
+            <div class="text-center py-12">
+              <span class="text-6xl block mb-4">✅</span>
+              <h3 class="text-xl font-semibold text-neutral-900 mb-2">No alerts yet</h3>
+              <p class="text-neutral-600">All your hives are operating normally</p>
+            </div>
+          </app-card>
+        }
+
+        @if (recentAlerts.length > 0) {
+          <app-card>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-neutral-50 border-b border-neutral-200">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Severity</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Message</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Hive</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Triggered</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Resolved</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-neutral-200">
+                  @for (alert of recentAlerts; track alert.id) {
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span 
+                          class="px-2 py-1 rounded-full text-xs font-medium"
+                          [ngClass]="getSeverityBadgeClass(alert.severity)">
+                          {{ alert.severity | titlecase }}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4">
+                        <div class="text-sm text-neutral-900">{{ alert.message }}</div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                        {{ getRucheNameById(alert.rucheId) }}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">
+                        {{ formatDate(alert.triggeredAt) }}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span 
+                          class="px-2 py-1 rounded-full text-xs font-medium"
+                          [class.bg-success-light]="alert.resolved"
+                          [class.text-success-dark]="alert.resolved"
+                          [class.bg-warning-light]="!alert.resolved"
+                          [class.text-warning-dark]="!alert.resolved">
+                          {{ alert.resolved ? 'Resolved' : 'Active' }}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">
+                        {{ alert.resolvedAt ? formatDate(alert.resolvedAt) : '-' }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </app-card>
+        }
+      </div>
+    }
+
+  </div>
+
+  <!-- Create Modal -->
+  @if (showCreateModal) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" (click)="closeCreateModal()">
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+        <div class="p-6 border-b border-neutral-200">
+          <h2 class="text-2xl font-bold text-neutral-900">Create Alert Rule</h2>
+          <p class="text-sm text-neutral-600 mt-1">Configure a new monitoring rule</p>
+        </div>
+
+        <div class="p-6 space-y-6">
+          <!-- Rule Name -->
+          <div>
+            <label class="block text-sm font-medium text-neutral-700 mb-2">Rule Name *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="newRule.name"
+              placeholder="e.g., Low Weight Alert"
+              class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-honey-500 focus:border-transparent">
+          </div>
+
+          <!-- Alert Type -->
+          <div>
+            <label class="block text-sm font-medium text-neutral-700 mb-2">Alert Type *</label>
+            <select 
+              [(ngModel)]="newRule.type"
+              class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-honey-500 focus:border-transparent">
+              <option value="weight_min">Minimum Weight</option>
+              <option value="weight_variation">Rapid Weight Variation</option>
+              <option value="temperature_high">High Temperature</option>
+              <option value="temperature_low">Low Temperature</option>
+              <option value="humidity_high">High Humidity</option>
+              <option value="humidity_low">Low Humidity</option>
+            </select>
+          </div>
+
+          <!-- Threshold -->
+          <div>
+            <label class="block text-sm font-medium text-neutral-700 mb-2">Threshold Value *</label>
+            <input 
+              type="number" 
+              [(ngModel)]="newRule.threshold"
+              class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-honey-500 focus:border-transparent">
+          </div>
+
+          <!-- Target Hive -->
+          <div>
+            <label class="block text-sm font-medium text-neutral-700 mb-2">Target Hive</label>
+            <select 
+              [(ngModel)]="newRule.rucheId"
+              class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-honey-500 focus:border-transparent">
+              <option [value]="undefined">All Hives (Global)</option>
+              @for (ruche of ruches; track ruche.id) {
+                <option [value]="ruche.id">{{ ruche.name }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Notification Channels -->
+          <div>
+            <label class="block text-sm font-medium text-neutral-700 mb-2">Notification Channels *</label>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  [checked]="hasChannel('in_app')"
+                  (change)="toggleChannel('in_app')"
+                  class="w-4 h-4 text-honey-500 border-neutral-300 rounded focus:ring-honey-500">
+                <span class="text-sm text-neutral-700">📱 In-App Notifications</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  [checked]="hasChannel('whatsapp')"
+                  (change)="toggleChannel('whatsapp')"
+                  class="w-4 h-4 text-honey-500 border-neutral-300 rounded focus:ring-honey-500">
+                <span class="text-sm text-neutral-700">📞 WhatsApp Notifications</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- WhatsApp Number (conditional) -->
+          @if (hasChannel('whatsapp')) {
+            <div>
+              <label class="block text-sm font-medium text-neutral-700 mb-2">WhatsApp Number *</label>
+              <input 
+                type="tel" 
+                [(ngModel)]="newRule.whatsappNumber"
+                placeholder="+33 6 12 34 56 78"
+                class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-honey-500 focus:border-transparent">
+            </div>
+          }
+
+          <!-- Enabled Status -->
+          <div>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="newRule.enabled"
+                class="w-4 h-4 text-honey-500 border-neutral-300 rounded focus:ring-honey-500">
+              <span class="text-sm font-medium text-neutral-700">Enable this rule immediately</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="p-6 border-t border-neutral-200 flex justify-end gap-3">
+          <button class="btn btn-secondary" (click)="closeCreateModal()">
+            <span>Cancel</span>
+          </button>
+          <button class="btn btn-primary" (click)="createRule()">
+            <span>Create Rule</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Edit Modal -->
+  @if (showEditModal && editingRule) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" (click)="closeEditModal()">
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+        <div class="p-6 border-b border-neutral-200">
+          <h2 class="text-2xl font-bold text-neutral-900">Edit Alert Rule</h2>
+          <p class="text-sm text-neutral-600 mt-1">Modify rule: {{ editingRule.name }}</p>
+        </div>
+
+        <div class="p-6 space-y-6">
+          <!-- Rule Name -->
+          <div>
+            <label class="block text-sm font-medium text-neutral-700 mb-2">Rule Name *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="newRule.name"
+              class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-honey-500 focus:border-transparent">
+          </div>
+
+          <!-- Alert Type -->
+          <div>
+            <label class="block text-sm font-medium text-neutral-700 mb-2">Alert Type *</label>
+            <select 
+              [(ngModel)]="newRule.type"
+              class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-honey-500 focus:border-transparent">
+              <option value="weight_min">Minimum Weight</option>
+              <option value="weight_variation">Rapid Weight Variation</option>
+              <option value="temperature_high">High Temperature</option>
+              <option value="temperature_low">Low Temperature</option>
+              <option value="humidity_high">High Humidity</option>
+              <option value="humidity_low">Low Humidity</option>
+            </select>
+          </div>
+
+          <!-- Threshold -->
+          <div>
+            <label class="block text-sm font-medium text-neutral-700 mb-2">Threshold Value *</label>
+            <input 
+              type="number" 
+              [(ngModel)]="newRule.threshold"
+              class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-honey-500 focus:border-transparent">
+          </div>
+
+          <!-- Target Hive -->
+          <div>
+            <label class="block text-sm font-medium text-neutral-700 mb-2">Target Hive</label>
+            <select 
+              [(ngModel)]="newRule.rucheId"
+              class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-honey-500 focus:border-transparent">
+              <option [value]="undefined">All Hives (Global)</option>
+              @for (ruche of ruches; track ruche.id) {
+                <option [value]="ruche.id">{{ ruche.name }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Notification Channels -->
+          <div>
+            <label class="block text-sm font-medium text-neutral-700 mb-2">Notification Channels *</label>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  [checked]="hasChannel('in_app')"
+                  (change)="toggleChannel('in_app')"
+                  class="w-4 h-4 text-honey-500 border-neutral-300 rounded focus:ring-honey-500">
+                <span class="text-sm text-neutral-700">📱 In-App Notifications</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  [checked]="hasChannel('whatsapp')"
+                  (change)="toggleChannel('whatsapp')"
+                  class="w-4 h-4 text-honey-500 border-neutral-300 rounded focus:ring-honey-500">
+                <span class="text-sm text-neutral-700">📞 WhatsApp Notifications</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- WhatsApp Number (conditional) -->
+          @if (hasChannel('whatsapp')) {
+            <div>
+              <label class="block text-sm font-medium text-neutral-700 mb-2">WhatsApp Number *</label>
+              <input 
+                type="tel" 
+                [(ngModel)]="newRule.whatsappNumber"
+                placeholder="+33 6 12 34 56 78"
+                class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-honey-500 focus:border-transparent">
+            </div>
+          }
+
+          <!-- Enabled Status -->
+          <div>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="newRule.enabled"
+                class="w-4 h-4 text-honey-500 border-neutral-300 rounded focus:ring-honey-500">
+              <span class="text-sm font-medium text-neutral-700">Rule is enabled</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="p-6 border-t border-neutral-200 flex justify-end gap-3">
+          <button class="btn btn-secondary" (click)="closeEditModal()">
+            <span>Cancel</span>
+          </button>
+          <button class="btn btn-primary" (click)="updateRule()">
+            <span>Save Changes</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
